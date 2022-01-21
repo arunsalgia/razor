@@ -1,28 +1,15 @@
 const Instamojo = require("instamojo-payment-nodejs");
 const crypto = require("crypto");
 const Razorpay = require("razorpay");
-
+var docxConverter = require('docx-pdf');
 var router = express.Router();
+const PDFDocument = require('pdfkit');
 
-
-// live keys
-//const RAZOR_API_KEY = "rzp_live_PWqtTU1HrN1C5M";
-//const RAZOR_AUTH_KEY = "jbV2ARMEfXPCNZUZ84GUnQQ9";
-
-// test keys
-const RAZOR_API_KEY = "rzp_test_UI178Dz1qN1si4";
-const RAZOR_AUTH_KEY = "lddjmqqsaZlhycXBjIXdrpnd";
-
-const instance = new Razorpay({
-  key_id: RAZOR_API_KEY,
-  key_secret: RAZOR_AUTH_KEY,
-});
 
 
 router.use('/', function(req, res, next) {
   // WalletRes = res;
   setHeader(res);
-	console.log("Hell Mian");
   next('route');
 });
 
@@ -34,7 +21,7 @@ var params = {
 };
 
 var razorOptions = {
-	"key": RAZOR_API_KEY,
+	"key": "rzp_test_UI178Dz1qN1si4",
 	//"amount": 0, 		// Example: 2000 paise = INR 20
 	//"currency": "INR",
 	"order_id": "",
@@ -47,7 +34,7 @@ var razorOptions = {
 		"email": 'arunsalgia@gmail.com',		// customer email
 		"contact": '8080820084' 	//customer phone no.
 	},
-	"notes": {
+	"notes": { 
 		"address": "address" //customer address 
 	},
 	"theme": {
@@ -55,6 +42,62 @@ var razorOptions = {
 	}
 };
 			
+
+router.get('/pdf', async function (req, res) {
+  let myFile = process.cwd() + `/public/generate.pdf`;		// getFileName(pname, myProduct[0].versionNumber, ptype);
+
+	const doc = new PDFDocument();
+	//doc.addPage();
+	doc.image(process.cwd() + '/public/HEADER.JPG', {
+    align: 'center'
+  });
+	doc.fontSize(27).text('This the article for GeeksforGeeks', 100, 100);
+	doc.pipe(fs.createWriteStream(myFile));
+	doc.end();
+	sendok(res, 'OK');
+});
+
+router.get('/download/:fName', async function (req, res) {
+  setHeader(res);
+	var {fName} = req.params;
+  console.log("in download");
+  
+  let myFile = process.cwd() + `/public/test.docx`;		// getFileName(pname, myProduct[0].versionNumber, ptype);
+	let outFile = process.cwd() + `/public/${fName}`;	
+  console.log(myFile);
+	console.log(outFile);
+
+	/*
+  if (fs.existsSync(myFile)) {
+    res.contentType("application/docx");
+		console.log("..............file found", myFile);
+    await res.status(200).sendFile(myFile);
+  } else
+    senderr(res, 601, "Doc not found");  
+	*/
+
+	
+	let convSuccess = false;
+	docxConverter(myFile, outFile, async function(err,result){
+		if(err){
+			console.log("It is error");
+			console.log(err);
+			senderr(res, 601, "Doc not found");  
+		} else {
+			console.log("It is fine");
+			console.log(result);
+			if (fs.existsSync(outFile)) {
+				res.contentType("application/pdf");
+				console.log("..............file found", outFile);
+				await res.status(200).sendFile(outFile);
+				
+			} else
+				senderr(res, 601, "Doc not found");  
+		}
+	});
+	
+})
+
 router.get('/order/:amount', async function( req, res) {
 	console.log("Hello");
 
@@ -62,6 +105,11 @@ router.get('/order/:amount', async function( req, res) {
 	params.amount = Number(amount)*100;
 	console.log(`Amount ${params.amount}`);
 	
+	let instance = new Razorpay({
+		key_id: "rzp_test_UI178Dz1qN1si4",
+		key_secret: "lddjmqqsaZlhycXBjIXdrpnd",
+	});
+
   instance.orders
     .create(params)
     .then((data) => {
@@ -81,7 +129,7 @@ router.get("/verify/:razorpay_order_id/:razorpay_payment_id/:razorpay_signature"
   body = razorpay_order_id + "|" + razorpay_payment_id;
 
   var expectedSignature = crypto
-    .createHmac("sha256", "lddjmqqsaZlhycXBjIXdrpnd")
+    .createHmac("sha256", "rzp_test_UI178Dz1qN1si4")
     .update(body.toString())
     .digest("hex");
 		

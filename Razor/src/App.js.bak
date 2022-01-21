@@ -9,7 +9,7 @@ import "assets/css/material-dashboard-react.css?v=1.9.0";
 import { PinDropSharp } from "@material-ui/icons";
 import Razor from "views/Razor"
 import DocView from "views/DocView"
-import SignIn from "views/SignIn"
+
 
 function AppRouter() {
   //let history={hist}
@@ -19,7 +19,7 @@ function AppRouter() {
 
 
   return (
-    <SignIn />
+    <DocView />
   );
 
 }

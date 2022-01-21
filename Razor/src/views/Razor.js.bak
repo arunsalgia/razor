@@ -194,7 +194,7 @@ function newPage(pageNum) {
 
   return (
     <Container component="main" maxWidth="lg">
-	  <VsPagination showStart showEnd count={50} left={left} setLeft={setLeft} current={current} onClick={newPage} />
+	  <VsPagination showStart showEnd count={90} left={left} setLeft={setLeft} current={current} onClick={newPage} />
       <CssBaseline />
       <div className={classes.paper}>
       <Typography component="h1" variant="h5">Razor Testing</Typography>
